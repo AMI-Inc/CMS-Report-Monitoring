@@ -68,10 +68,10 @@ class ImoAPI:
         result = self.CheckVesselStatus(excludedImoIds)
         for data in result['data']:
             if data["status"] == False:
-                data["email_status"] = self.SendEmail(data["imo_id"])
+                data["email_status"] = self.SendEmail(data["imo_id"], data["last_submitted_date"])
         return result
     
-    def SendEmail(self, imo_id):
+    def SendEmail(self, imo_id, last_submitted_date):
 
         sql = f"""
             SELECT * FROM auth WHERE userid = '{imo_id}'
@@ -89,7 +89,7 @@ class ImoAPI:
         db_connection.disconnect()
         if result:
             if result["email_addr"]:
-                res = self.emailInstance.SendEMail(result["email_addr"])
+                res = self.emailInstance.SendEMail(result["email_addr"], last_submitted_date)
                 return(res)
             else:
                 return f"""{imo_id} does not have email in file."""
