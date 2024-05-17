@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -15,7 +15,7 @@ class EmailAPI:
         self.subject = "CMS Report Monitoring"
         self.full_name = "CMS Report Monitoring Notification"
     
-    def SendEMail(self, email, attachments=None):
+    def SendEMail(self, email, last_submitted_date, attachments=None):
         try:
 
             msg = MIMEMultipart()
@@ -23,6 +23,11 @@ class EmailAPI:
             msg['To'] = ', '.join(email)
             msg['Subject'] = self.subject
 
+            # Get the current date and time in UTC
+            now_utc = datetime.now(timezone.utc)
+
+            # Format the date and time
+            date = now_utc.strftime("%b %d, %Y %I:%M %p")
             body = f"""
                 <!DOCTYPE html>
                 <html lang="en">
@@ -70,6 +75,15 @@ class EmailAPI:
                     <body>
                         <div class="container">
                             <h2>CMS Report Monitoring</h2>
+                            <p>{date}</p>
+                            <br />
+                            <br />
+                            <p>Good day Captain,</p>
+                            <br />
+                            <p>We note that the last daily CII report received from your good vessel was {last_submitted_date.strftime("%b %d, %Y %I:%M %p")}. Kindly provide daily report(s) information since that time.</p>
+                            <p>Very best regards,</p>
+                            <p>CMS Support Team</p>
+                            <p>cms_support@amiwx.com</p>
                         </div>
                     </body>
                 </html>
