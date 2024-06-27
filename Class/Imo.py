@@ -95,6 +95,7 @@ class ImoAPI:
                 return f"""{imo_id} does not have email in file."""
         else:
             return f"""{imo_id} is not found in auth table."""
+    
     def TestFetchOne(self):
         sql = f"""
             SELECT * FROM imo
@@ -120,3 +121,103 @@ class ImoAPI:
         
         return(response)
     
+    def GetImoVoyages(self):
+
+        sql = f"""
+            SELECT 
+                * 
+            FROM 
+                imo i 
+            LEFT JOIN 
+                imovoyage_daily ivd 
+                ON i.imo_id = ivd.imo_id
+            WHERE 
+                i.voyage_id IS NOT NULL 
+                AND ivd.rdate = now()::date
+        """
+
+        
+        self.db_connection.connect()
+        result = self.db_connection.fetch_data(sql)
+        self.db_connection.disconnect()
+        
+        if isinstance(result, list):
+            response = {
+                "success" : True,
+                "data"  : result,
+                "error" : None
+            }
+        else:
+            response = {
+                "success" : False,
+                "data"  : None,
+                "error" : {
+                    "message" : result
+                }
+            }
+        
+        return(response)
+    
+    def GetRouteDbVoyages(self, voyage_id):
+
+        sql = f"""
+            SELECT * FROM voyage_summary WHERE voyageid = {voyage_id}
+        """
+
+        db_connection = Database(
+                    host=Config.route_db_host, 
+                    database=Config.route_db_database, 
+                    user=Config.route_db_user, 
+                    password=Config.route_db_password, 
+                    port=Config.route_db_port, 
+                    client_encoding=Config.client_encoding
+                )
+        db_connection.connect()
+        result = db_connection.fetch(sql)
+        db_connection.disconnect()
+        
+        if result:
+            response = {
+                "success" : True,
+                "data"  : result,
+                "error" : None
+            }
+        else:
+            response = {
+                "success" : False,
+                "data"  : None,
+                "error" : {
+                    "message" : "No routedb details.",
+                    "sql" : sql
+                }
+            }
+        
+        return(response)
+    
+    def CheckFuelConsumption(self):
+        imoVoyage = self.GetImoVoyages()
+        res = []
+        if imoVoyage["success"] == True:
+            for d in imoVoyage["data"]:
+                routeDbData = self.GetRouteDbVoyages(d["voyage_id"])
+
+                if isinstance(routeDbData, list):
+                    arr = {
+                        "voyage_id" : d["voyage_id"],
+                        "imo_hfo" : d["hfo"],
+                        "route_db_hfo" : routeDbData["data"]["fo_rate_total"]
+                    }
+                    res.append(arr)
+                else:
+                    arr = {
+                        "voyage_id" : d["voyage_id"],
+                        "imo_hfo" : d["hfo"],
+                        "route_db_hfo" : routeDbData["error"]
+                    }
+                    res.append(arr)
+
+                
+            return(res)
+        else:
+            return imoVoyage
+        

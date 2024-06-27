@@ -20,6 +20,12 @@ def StartMonitoring():
     result = imoInstance.StartMonitoring(excludedImoIdsStr)
     return make_response(jsonify(result), 200)
 
+@app.route(route_base + "/check-fuel-consumption", methods=["GET"])
+def CheckFuelConsumption():
+    imoInstance = ImoAPI()
+    result = imoInstance.CheckFuelConsumption()
+    return make_response(jsonify(result), 200)
+
 if __name__ == "__main__":
     app.run(debug=True)
 
