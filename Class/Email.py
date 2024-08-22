@@ -21,7 +21,7 @@ class EmailAPI:
             msg = MIMEMultipart()
             msg['From'] = f"""{self.full_name} <{self.smtp_username}>"""
             #msg['To'] = ', '.join(email)
-            msg['To'] = self.recipients
+            msg['To'] = ', '.join(self.recipients)
             msg['Subject'] = self.subject
 
             # Get the current date and time in UTC
