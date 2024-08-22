@@ -11,7 +11,7 @@ class EmailAPI:
         self.smtp_password = 'pqpt vluh gkij qesh'
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
-        self.recipients = ['eduardo@offshoredoneright.com','mariyakabirova@amiwx.com']
+        self.recipients = ['eduardo@offshoredoneright.com', 'jshonka@amiwx.com']
         self.subject = "CMS Report Monitoring"
         self.full_name = "CMS Report Monitoring Notification"
     
@@ -98,13 +98,13 @@ class EmailAPI:
                         part.add_header('Content-Disposition', f'attachment; filename="{attachment}"')
                         msg.attach(part)
 
-            # server = smtplib.SMTP(self.smtp_server, self.smtp_port)
-            # server.starttls()
-            # server.login(self.smtp_username, self.smtp_password)
-            # server.sendmail(self.smtp_username, self.recipients, msg.as_string())
-            # server.quit()
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            server.starttls()
+            server.login(self.smtp_username, self.smtp_password)
+            server.sendmail(self.smtp_username, self.recipients, msg.as_string())
+            server.quit()
 
-            # return f"""Email successfully sent to {email}."""
+            return f"""Email successfully sent to {email}."""
 
             return msg.as_string()
         except Exception as e:
